@@ -21,6 +21,7 @@
     ,   $ = (global.jQuery || global.Zepto || global.ender || $d)
     ,   $$
     ,   $b
+    ,   $f
     ,   ke = 'keydown';
     
     function realTypeOf(v, s) {
@@ -140,6 +141,7 @@
         
     };
     
+    var i, n;
     // To minimise code bloat, add all of the NUMPAD 0-9 keys in a loop
     i = 95, n = 0;
     while(++i < 106) {
@@ -162,7 +164,7 @@
     }
     
     // To minimise code bloat, add all of the letters of the alphabet in a loop
-    var i = 64;
+    i = 64;
     while(++i < 91) {
         _keys.keys[String.fromCharCode(i).toLowerCase()] = i;
     }
