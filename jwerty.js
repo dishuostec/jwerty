@@ -441,6 +441,7 @@
             // then try to use $.on(...) to delegate event
             if (typeof realSelector === 'string' && delegate) {
               $o(realSelector, callbackFunction, realSelectorContext);
+              return;
             }
 
             // If `realSelector` is already a jQuery/Zepto/Ender/DOM element,
