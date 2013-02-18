@@ -569,12 +569,21 @@ test("Test delegate binding event", function () {
     expect(2);
     
     var id = 'delegate';
+    var task = function() {
+      jwerty.key('space', function(e) {
+          ok(e.target.id === id, 'Expects event target is created element');
+      }, '#'+id);
+    };
 
     ok(document.getElementById(id) === null, 'Expects input not exist');
 
-    jwerty.key('space', function(e) {
-        ok(e.target.id === id, 'Expects event target is created element');
-    }, '#'+id);
+    if (window.jQuery || window.Zepto) {
+      task();
+    } else {
+      raises(function() {
+        task();
+      }, 'Raise an error when using without jQuery and Zepto');
+    }
     
     buildEvent(32, false, false, false, false, this.createInput(id));
 });
