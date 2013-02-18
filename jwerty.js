@@ -21,7 +21,9 @@
     ,   $ = (global.jQuery || global.Zepto || global.ender || $d)
     ,   $$
     ,   $b
+    ,   $o
     ,   $f
+    ,   delegate = !!($.fn && $.fn.on)
     ,   ke = 'keydown';
     
     function realTypeOf(v, s) {
@@ -48,8 +50,13 @@
             return (e || $).dispatchEvent(ret);
         }
     } else {
-        $$ = function (selector, context, fn) { return $(selector || $d, context); };
+        $$ = function (selector, context) { return $(selector || $d, context); };
         $b = function (e, fn) { $(e).bind(ke + '.jwerty', fn); };
+        if (delegate) {
+            $o = function (selector, fn, context) {
+              $(context || document).on(ke + '.jwerty', selector, fn);
+            };
+        }
         $f = function (e, ob) { $(e || $d).trigger($.Event(ke, ob)); };
     }
     
@@ -427,11 +434,20 @@
             // `selectorContext` to the left (take it from `selector`)
             ,    realSelectorContext = realSelector === callbackContext ? selector : selectorContext;
             
+
+            callbackFunction = jwerty.event(jwertyCode, callbackFunction, realcallbackContext);
+
+            // If 'realSelector' is string,
+            // then try to use $.on(...) to delegate event
+            if (typeof realSelector === 'string' && delegate) {
+              $o(realSelector, callbackFunction, realSelectorContext);
+            }
+
             // If `realSelector` is already a jQuery/Zepto/Ender/DOM element,
             // then just use it neat, otherwise find it in DOM using $$()
             $b(realTypeOf(realSelector, 'element') ?
                realSelector : $$(realSelector, realSelectorContext)
-            , jwerty.event(jwertyCode, callbackFunction, realcallbackContext));
+            , callbackFunction);
         },
         
         /**
@@ -464,5 +480,31 @@
         
         KEYS: _keys
     };
+
+    // Extend jwerty to jQuery or Zepto if possiable
+    delegate && ($.fn.jwerty = function(hotkeys, selector, fn) {
+      var hotkey
+      ,   data = undefined
+      ,   jwertyEvent = ke + '.jwerty';
+
+      if (typeof hotkeys === 'object') {
+          for (hotkey in hotkeys) {
+              fn = jwerty.event(hotkey, hotkeys[hotkey]);
+              this.on(jwertyEvent, selector, data, fn);
+          }
+          return this;
+      }
+
+      if (fn == null) {
+          fn = selector;
+          selector = undefined;
+      }
+     
+      fn = jwerty.event(hotkeys, fn);
+
+      return this.each( function(i, ele) {
+          $.event.add( this, jwertyEvent, fn, data, selector );
+      });
+    });
     
 }(this, (typeof module !== 'undefined' && module.exports ? module.exports : this)));

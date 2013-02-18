@@ -29,6 +29,13 @@ module('jwerty', {
         this.input = document.createElement('input');
         var self = this;
         listenForKey(this.input, function () { ++self.keyupCount; });
+        this.createInput = function(id) {
+          var input = document.createElement('input');
+          input.id = id;
+          input.style.display = 'none';
+          document.body.appendChild(input);
+          return input;
+        };
     }
     
 });
@@ -558,6 +565,19 @@ test("Test context passing to bound function context of event function", functio
     buildEvent(32, false, false, false, false, this.input);
 });
 
+test("Test delegate binding event", function () {
+    expect(2);
+    
+    var id = 'delegate';
+
+    ok(document.getElementById(id) === null, 'Expects input not exist');
+
+    jwerty.key('space', function(e) {
+        ok(e.target.id === id, 'Expects event target is created element');
+    }, '#'+id);
+    
+    buildEvent(32, false, false, false, false, this.createInput(id));
+});
 
 test("Test key binding without element, binding to `document`", function () {
     expect(1);
